@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <button class="logout-btn" onclick="logout()" style="display: none;" id="logoutBtn">Logout</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>📚 Library Management System</h1>
+            <p>Comprehensive Library Management Solution</p>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="login-section">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Choose Login Type</h2>
+            <div class="user-type-buttons">
+                <button class="user-type-btn" onclick="showLogin('user')">
+                    👤 User Login
+                </button>
+                <button class="user-type-btn admin" onclick="showLogin('admin')">
+                    👑 Admin Login
+                </button>
+            </div>
+
+            <div id="loginForm" style="display: none;">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="error-message" id="loginError"></div>
+                <button class="btn" onclick="login()">Login</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="mainContent" class="main-content">
+            <!-- Navigation Menu -->
+            <div class="nav-menu" id="navMenu">
+                <!-- Navigation buttons will be populated based on user type -->
+            </div>
+
+            <!-- Dashboard -->
+            <div id="dashboard" class="section active">
+                <h2>📊 Dashboard</h2>
+                <div class="grid">
+                    <div class="card">
+                        <h3>📚 Total Books</h3>
+                        <p style="font-size: 2rem; font-weight: bold; color: #4CAF50;" id="totalBooks">150</p>
+                    </div>
+                    <div class="card">
+                        <h3>👥 Total Members</h3>
+                        <p style="font-size: 2rem; font-weight: bold; color: #2196F3;" id="totalMembers">45</p>
+                    </div>
+                    <div class="card">
+                        <h3>📖 Books Issued</h3>
+                        <p style="font-size: 2rem; font-weight: bold; color: #FF9800;" id="booksIssued">23</p>
+                    </div>
+                    <div class="card">
+                        <h3>⚠️ Overdue Books</h3>
+                        <p style="font-size: 2rem; font-weight: bold; color: #F44336;" id="overdueBooks">5</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Issue Book -->
+            <div id="issueBook" class="section">
+                <h2>📤 Issue Book</h2>
+                <form onsubmit="return handleIssueBook(event)">
+                    <div class="grid">
+                        <div class="card">
+                            <div class="form-group">
+                                <label for="issueBookName">Name of Book (Required):</label>
+                                <input type="text" id="issueBookName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="issueAuthor">Author Name (Auto-populated, non-editable):</label>
+                                <input type="text" id="issueAuthor" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="issueDate">Issue Date (Cannot be less than today):</label>
+                                <input type="date" id="issueDate" required>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="form-group">
+                                <label for="returnDate">Return Date (15 days ahead, editable):</label>
+                                <input type="date" id="returnDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="issueRemarks">Remarks (Non-mandatory):</label>
+                                <textarea id="issueRemarks" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="error-message" id="issueError"></div>
+                    <div class="success-message" id="issueSuccess"></div>
+                    <button type="submit" class="btn">Send Request</button>
+                </form>
+            </div>
+
+            <!-- Return Book -->
+            <div id="returnBook" class="section">
+                <h2>📥 Return Book</h2>
+                <form onsubmit="return handleReturnBook(event)">
+                    <div class="grid">
+                        <div class="card">
+                            <div class="form-group">
+                                <label for="returnBookName">Name of Book (Required):</label>
+                                <input type="text" id="returnBookName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="returnAuthor">Author Name (Auto-populated, non-editable):</label>
+                                <input type="text" id="returnAuthor" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="serialNumber">Serial No of Book (Mandatory):</label>
+                                <input type="text" id="serialNumber" required>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="form-group">
+                                <label for="returnIssuedDate">Issue Date (Auto-populated, non-editable):</label>
+                                <input type="date" id="returnIssuedDate" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="actualReturnDate">Return Date (Auto-populated to selected date):</label>
+                                <input type="date" id="actualReturnDate" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="error-message" id="returnError"></div>
+                    <div class="success-message" id="returnSuccess"></div>
+                    <button type="submit" class="btn">Send Request</button>
+                </form>
+            </div>
+
+          
+                   
+
+            <!-- Check Book Availability -->
+            <div id="checkAvailability" class="section">
+                <h2>🔍 Check Book Availability</h2>
+                <div class="card">
+                    <div class="form-group">
+                        <label for="searchBook">Search Book:</label>
+                        <input type="text" id="searchBook" placeholder="Enter book name or author">
+                    </div>
+                    <button class="btn btn-info" onclick="searchBooks()">Search</button>
+                    
+                    <div class="table-container" style="margin-top: 20px;">
+                        <table class="data-table" id="availabilityTable">
+                            <thead>
+                                <tr>
+                                    <th>Book Name</th>
+                                    <th>Author</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Location</th>
+                                    <th>Select</th>
+                                </tr>
+                            </thead>
+                            <tbody id="availabilityTableBody">
+                                <tr>
+                                    <td>The Great Gatsby</td>
+                                    <td>F. Scott Fitzgerald</td>
+                                    <td>Fiction</td>
+                                    <td><span class="status-badge status-active">Available</span></td>
+                                    <td>A-101</td>
+                                    <td><input type="radio" name="bookSelect" value="gatsby"></td>
+                                </tr>
+                                <tr>
+                                    <td>To Kill a Mockingbird</td>
+                                    <td>Harper Lee</td>
+                                    <td>Fiction</td>
+                                    <td><span class="status-badge status-overdue">Issued</span></td>
+                                    <td>A-102</td>
+                                    <td><input type="radio" name="bookSelect" value="mockingbird" disabled></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Membership Management -->
+            <div id="membership" class="section">
+                <h2>👥 Membership Management</h2>
+                
+                <div class="nav-menu" style="justify-content: flex-start; margin-bottom: 20px;">
+                    <button class="nav-btn" onclick="showMembershipSection('add')">Add Membership</button>
+                    <button class="nav-btn" onclick="showMembershipSection('update')">Update Membership</button>
+                    <button class="nav-btn" onclick="showMembershipSection('list')">View Members</button>
+                </div>
+
+                <!-- Add Membership -->
+                <div id="addMembership" class="membership-section">
+                    <h3>➕ Add New Membership</h3>
+                    <form onsubmit="return handleAddMembership(event)">
+                        <div class="grid">
+                            <div class="card">
+                                <div class="form-group">
+                                    <label for="memberName">Name (Mandatory):</label>
+                                    <input type="text" id="memberName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="memberEmail">Email:</label>
+                                    <input type="email" id="memberEmail">
+                                </div>
+                                <div class="form-group">
+                                    <label for="memberPhone">Phone:</label>
+                                    <input type="tel" id="memberPhone">
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="form-group">
+                                    <label>Membership Duration (Mandatory):</label>
+                                    <div class="radio-group">
+                                        <div class="radio-item">
+                                            <input type="radio" id="duration6" name="duration" value="6" checked>
+                                            <label for="duration6">6 months</label>
+                                        </div>
+                                        <div class="radio-item">
+                                            <input type="radio" id="duration12" name="duration" value="12">
+                                            <label for="duration12">1 year</label>
+                                        </div>
+                                        <div class="radio-item">
+                                            <input type="radio" id="duration24" name="duration" value="24">
+                                            <label for="duration24">2 years</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="memberAddress">Address:</label>
+                                    <textarea id="memberAddress" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="error-message" id="membershipError"></div>
+                        <div class="success-message" id="membershipSuccess"></div>
+                        <button type="submit" class="btn">Add Member</button>
+                    </form>
+                </div>
+
+                <!-- Update Membership -->
+                <div id="updateMembership" class="membership-section" style="display: none;">
+                    <h3>✏️ Update Membership</h3>
+                    <div class="card">
+                        <div class="form-group">
+                            <label for="updateMemberNumber">Membership Number (Mandatory):</label>
+                            <input type="text" id="updateMemberNumber" required>
+                        </div>
+                        <button class="btn btn-info" onclick="loadMemberDetails()">Load Member Details</button>
+                        
+                        <div id="updateMemberForm" style="display: none; margin-top: 20px;">
+                            <div class="form-group">
+                                <label>Extension Options:</label>
+                                <div class="radio-group">
+                                    <div class="radio-item">
+                                        <input type="radio" id="extend6" name="extension" value="6" checked>
+                                        <label for="extend6">Extend 6 months</label>
+                                    </div>
+                                    <div class="radio-item">
+                                        <input type="radio" id="cancel" name="extension" value="cancel">
+                                        <label for="cancel">Cancel Membership</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn" onclick="updateMembershipStatus()">Update Membership</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Members -->
+                <div id="viewMembers" class="membership-section" style="display: none;">
+                    <h3>📋 Members List</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Member ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>M001</td>
+                                    <td>Utkarsh</td>
+                                    <td>9555utkarsh@gmail.com</td>
+                                    <td>+91-8756506613</td>
+                                    <td>12 months</td>
+                                    <td><span class="status-badge status-active">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-warning" style="padding: 5px 10px; font-size: 0.8rem;">Edit</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>M002</td>
+                                    <td>Gunjan</td>
+                                    <td>Gunjan@gmail.com</td>
+                                    <td>+91-9876543211</td>
+                                    <td>6 months</td>
+                                    <td><span class="status-badge status-overdue">Expired</span></td>
+                                    <td>
+                                        <button class="btn btn-warning" style="padding: 5px 10px; font-size: 0.8rem;">Renew</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Book Management -->
+            <div id="bookManagement" class="section">
+                <h2>📚 Book Management</h2>
+                
+                <div class="nav-menu" style="justify-content: flex-start; margin-bottom: 20px;">
+                    <button class="nav-btn" onclick="showBookSection('add')">Add Book</button>
+                    <button class="nav-btn" onclick="showBookSection('update')">Update Book</button>
+                    <button class="nav-btn" onclick="showBookSection('list')">View Books</button>
+                </div>
+
+                <!-- Add Book -->
+                <div id="addBook" class="book-section">
+                    <h3>➕ Add New Book</h3>
+                    <form onsubmit="return handleAddBook(event)">
+                        <div class="grid">
+                            <div class="card">
+                                <div class="form-group">
+                                    <label>Book Category (One option must be selected, default: Book):</label>
+                                    <div class="radio-group">
+                                        <div class="radio-item">
+                                            <input type="radio" id="categoryBook" name="category" value="book" checked>
+                                            <label for="categoryBook">Book</label>
+                                        </div>
+                                        <div class="radio-item">
+                                            <input type="radio" id="categoryMovie" name="category" value="movie">
+                                            <label for="categoryMovie">Movie</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bookTitle">Book Title (Mandatory):</label>
+                                    <input type="text" id="bookTitle" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bookAuthor">Author (Mandatory):</label>
+                                    <input type="text" id="bookAuthor" required>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="form-group">
+                                    <label for="bookISBN">ISBN:</label>
+                                    <input type="text" id="bookISBN">
+                                </div>
+                                <div class="form-group">
+                                    <label for="bookGenre">Genre:</label>
+                                    <input type="text" id="bookGenre">
+                                </div>
+                                <div class="form-group">
+                                    <label for="bookLocation">Shelf Location:</label>
+                                    <input type="text" id="bookLocation">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="error-message" id="bookError"></div>
+                        <div class="success-message" id="bookSuccess"></div>
+                        <button type="submit" class="btn">Add Book</button>
+                    </form>
+                </div>
+
+                <!-- Update Book -->
+                <div id="updateBook" class="book-section" style="display: none;">
+                    <h3>✏️ Update Book</h3>
+                    <div class="card">
+                        <div class="form-group">
+                            <label>Update Options (One option must be selected, default: Book):</label>
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" id="updateBookOption" name="updateCategory" value="book" checked>
+                                    <label for="updateBookOption">Book</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="updateMovieOption" name="updateCategory" value="movie">
+                                    <label for="updateMovieOption">Movie</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="updateBookId">Book ID:</label>
+                            <input type="text" id="updateBookId" required>
+                        </div>
+                        <button class="btn btn-info" onclick="loadBookDetails()">Load Book Details</button>
+                        
+                        <div id="updateBookForm" style="display: none; margin-top: 20px;">
+                            <div class="form-group">
+                                <label for="updateBookTitle">Title (All fields mandatory):</label>
+                                <input type="text" id="updateBookTitle" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="updateBookAuthor">Author:</label>
+                                <input type="text" id="updateBookAuthor" required>
+                            </div>
+                            <button class="btn" onclick="updateBookDetails()">Update Book</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Books -->
+                <div id="viewBooks" class="book-section" style="display: none;">
+                    <h3>📋 Books List</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Book ID</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Location</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>B001</td>
+                                    <td>The Great Gatsby</td>
+                                    <td>F. Scott Fitzgerald</td>
+                                    <td>Fiction</td>
+                                    <td><span class="status-badge status-active">Available</span></td>
+                                    <td>A-101</td>
+                                    <td>
+                                        <button class="btn btn-warning" style="padding: 5px 10px; font-size: 0.8rem;">Edit</button>
+                                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem;">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>B002</td>
+                                    <td>To Kill a Mockingbird</td>
+                                    <td>Harper Lee</td>
+                                    <td>Fiction</td>
+                                    <td><span class="status-badge status-overdue">Issued</span></td>
+                                    <td>A-102</td>
+                                    <td>
+                                        <button class="btn btn-warning" style="padding: 5px 10px; font-size: 0.8rem;">Edit</button>
+                                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem;" disabled>Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports -->
+            <div id="reports" class="section">
+                <h2>📊 Reports</h2>
+                <div class="nav-menu" style="justify-content: flex-start; margin-bottom: 20px;">
+                    <button class="nav-btn" onclick="showReportSection('active')">Active Issues</button>
+                    <button class="nav-btn" onclick="showReportSection('overdue')">Overdue Returns</button>
+                    <button class="nav-btn" onclick="showReportSection('pending')">Pending Issues</button>
+                    <button class="nav-btn" onclick="showReportSection('members')">Master List of Members</button>
+                    <button class="nav-btn" onclick="showReportSection('books')">Master List of Books</button>
+                </div>
+
+                <div id="activeIssues" class="report-section">
+                    <h3>📖 Active Issues</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Member Name</th>
+                                    <th>Book Title</th>
+                                    <th>Issue Date</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Utkarsh Singh</td>
+                                    <td>The Great Gatsby</td>
+                                    <td>2025-09-10</td>
+                                    <td>2025-09-25</td>
+                                    <td><span class="status-badge status-active">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Gunjan</td>
+                                    <td>1984</td>
+                                    <td>2025-09-15</td>
+                                    <td>2025-09-30</td>
+                                    <td><span class="status-badge status-active">Active</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="overdueReturns" class="report-section" style="display: none;">
+                    <h3>⚠️ Overdue Returns</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Member Name</th>
+                                    <th>Book Title</th>
+                                    <th>Due Date</th>
+                                    <th>Days Overdue</th>
+                                    <th>Fine Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Mike Johnson</td>
+                                    <td>Pride and Prejudice</td>
+                                    <td>2025-09-05</td>
+                                    <td>19</td>
+                                    <td>₹95</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="pendingIssues" class="report-section" style="display: none;">
+                    <h3>⏳ Pending Issues Request</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Member Name</th>
+                                    <th>Book Requested</th>
+                                    <th>Request Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Sarah Wilson</td>
+                                    <td>Harry Potter</td>
+                                    <td>2025-09-20</td>
+                                    <td><span class="status-badge status-pending">Pending</span></td>
+                                    <td>
+                                        <button class="btn" style="padding: 5px 10px; font-size: 0.8rem;">Approve</button>
+                                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem;">Reject</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="masterMembers" class="report-section" style="display: none;">
+                    <h3>👥 Master List of Members</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Member ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Membership Type</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>M001</td>
+                                    <td>John Doe</td>
+                                    <td>john@email.com</td>
+                                    <td>+91-9876543210</td>
+                                    <td>Annual</td>
+                                    <td><span class="status-badge status-active">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td>M002</td>
+                                    <td>Jane Smith</td>
+                                    <td>jane@email.com</td>
+                                    <td>+91-9876543211</td>
+                                    <td>6 Months</td>
+                                    <td><span class="status-badge status-overdue">Expired</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="masterBooks" class="report-section" style="display: none;">
+                    <h3>📚 Master List of Books</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Book ID</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>B001</td>
+                                    <td>The Great Gatsby</td>
+                                    <td>F. Scott Fitzgerald</td>
+                                    <td>Fiction</td>
+                                    <td><span class="status-badge status-active">Available</span></td>
+                                    <td>A-101</td>
+                                </tr>
+                                <tr>
+                                    <td>B002</td>
+                                    <td>To Kill a Mockingbird</td>
+                                    <td>Harper Lee</td>
+                                    <td>Fiction</td>
+                                    <td><span class="status-badge status-overdue">Issued</span></td>
+                                    <td>A-102</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Management (Admin Only) -->
+            <div id="userManagement" class="section">
+                <h2>👤 User Management</h2>
+                <div class="nav-menu" style="justify-content: flex-start; margin-bottom: 20px;">
+                    <button class="nav-btn" onclick="showUserSection('add')">Add User</button>
+                    <button class="nav-btn" onclick="showUserSection('update')">Update User</button>
+                    <button class="nav-btn" onclick="showUserSection('list')">View Users</button>
+                </div>
+
+                <!-- Add User -->
+                <div id="addUser" class="user-section">
+                    <h3>➕ Add New User</h3>
+                    <form onsubmit="return handleAddUser(event)">
+                        <div class="grid">
+                            <div class="card">
+                                <div class="form-group">
+                                    <label>User Type (One option must be selected, default: New):</label>
+                                    <div class="radio-group">
+                                        <div class="radio-item">
+                                            <input type="radio" id="userTypeNew" name="userType" value="new" checked>
+                                            <label for="userTypeNew">New</label>
+                                        </div>
+                                        <div class="radio-item">
+                                            <input type="radio" id="userTypeExisting" name="userType" value="existing">
+                                            <label for="userTypeExisting">Existing</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="userName">Name (Mandatory):</label>
+                                    <input type="text" id="userName" required>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="form-group">
+                                    <label for="userEmail">Email:</label>
+                                    <input type="email" id="userEmail">
+                                </div>
+                                <div class="form-group">
+                                    <label for="userRole">Role:</label>
+                                    <select id="userRole">
+                                        <option value="user">User</option>
+                                        <option value="librarian">Librarian</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="error-message" id="userError"></div>
+                        <div class="success-message" id="userSuccess"></div>
+                        <button type="submit" class="btn">Add User</button>
+                    </form>
+                </div>
+
+                <!-- Update User -->
+                <div id="updateUser" class="user-section" style="display: none;">
+                    <h3>✏️ Update User</h3>
+                    <div class="card">
+                        <div class="form-group">
+                            <label for="updateUserId">User ID:</label>
+                            <input type="text" id="updateUserId" required>
+                        </div>
+                        <button class="btn btn-info" onclick="loadUserDetails()">Load User Details</button>
+                        
+                        <div id="updateUserForm" style="display: none; margin-top: 20px;">
+                            <div class="form-group">
+                                <label for="updateUserName">Name (All fields mandatory):</label>
+                                <input type="text" id="updateUserName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="updateUserEmail">Email:</label>
+                                <input type="email" id="updateUserEmail" required>
+                            </div>
+                            <button class="btn" onclick="updateUserDetails()">Update User</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Users -->
+                <div id="viewUsers" class="user-section" style="display: none;">
+                    <h3>👥 Users List</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>U001</td>
+                                    <td>Admin User</td>
+                                    <td>admin@library.com</td>
+                                    <td>Admin</td>
+                                    <td><span class="status-badge status-active">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-warning" style="padding: 5px 10px; font-size: 0.8rem;">Edit</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>U002</td>
+                                    <td>Library User</td>
+                                    <td>user@library.com</td>
+                                    <td>User</td>
+                                    <td><span class="status-badge status-active">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-warning" style="padding: 5px 10px; font-size: 0.8rem;">Edit</button>
+                                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem;">Disable</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
